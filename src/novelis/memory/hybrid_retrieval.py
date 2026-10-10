@@ -28,7 +28,8 @@ class HybridRetrievalEngine:
             import lancedb
             self._lancedb = lancedb.connect(str(self.db_dir))
             # Open existing or defer creation on first insert
-            if "scenes" in self._lancedb.table_names():
+            existing_tables = self._lancedb.list_tables() if hasattr(self._lancedb, "list_tables") else self._lancedb.table_names()
+            if "scenes" in existing_tables:
                 self._table = self._lancedb.open_table("scenes")
         except ImportError:
             # LanceDB not yet installed in active environment

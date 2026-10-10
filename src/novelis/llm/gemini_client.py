@@ -59,16 +59,33 @@ class GeminiClient(BaseLLMClient):
             )
 
         if self._mode == "genai":
-            response = self._genai_client.models.generate_content(
-                model=self.model_name,
-                contents=prompt,
-                config={
-                    "system_instruction": system_instruction,
-                    "temperature": temperature,
-                    "max_output_tokens": max_tokens
-                }
-            )
-            return response.text or ""
+            try:
+                response = self._genai_client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt,
+                    config={
+                        "system_instruction": system_instruction,
+                        "temperature": temperature,
+                        "max_output_tokens": max_tokens
+                    }
+                )
+                return response.text or ""
+            except Exception as e:
+                # If primary model is experiencing high demand (503 UNAVAILABLE), gracefully fallback to gemini-2.5-flash
+                if ("503" in str(e) or "UNAVAILABLE" in str(e)) and self.model_name != "gemini-2.5-flash":
+                    print(f"[Novelis LLM] Model '{self.model_name}' unavailable/busy (503). Falling back to 'gemini-2.5-flash'...", flush=True)
+                    self.model_name = "gemini-2.5-flash"
+                    fallback_resp = self._genai_client.models.generate_content(
+                        model=self.model_name,
+                        contents=prompt,
+                        config={
+                            "system_instruction": system_instruction,
+                            "temperature": temperature,
+                            "max_output_tokens": max_tokens
+                        }
+                    )
+                    return fallback_resp.text or ""
+                raise
 
         elif self._mode == "legacy":
             model = self._genai_client.GenerativeModel(

@@ -135,17 +135,17 @@ def cmd_run_scene(args):
     if config.GEMINI_API_KEY:
         try:
             llm = GeminiClient()
-            print(f"[Novelis] Using LLM: Google {config.GEMINI_MODEL}")
+            print(f"[Novelis] Using LLM: Google {config.GEMINI_MODEL}", flush=True)
         except Exception as e:
-            print(f"[Warning] Failed to load Gemini: {e}. Falling back to mock simulation mode.")
+            print(f"[Warning] Failed to load Gemini: {e}. Falling back to mock simulation mode.", flush=True)
     else:
-        print("[Info] GEMINI_API_KEY is not set. Running in mock simulation mode.")
+        print("[Info] GEMINI_API_KEY is not set. Running in mock simulation mode.", flush=True)
 
     orchestrator = SceneOrchestrator(llm_client=llm)
 
-    print(f"\n[Novelis] Starting scene generation cycle...")
-    print(f"  Beat: {beat}")
-    print(f"  Characters: {chars}")
+    print(f"\n[Novelis] Starting scene generation cycle...", flush=True)
+    print(f"  Beat: {beat}", flush=True)
+    print(f"  Characters: {chars}", flush=True)
 
     result = orchestrator.execute_scene(
         scene_id=args.scene_id or "scn_01_01",
@@ -157,13 +157,13 @@ def cmd_run_scene(args):
         epoch_id=args.epoch
     )
 
-    print("\n" + "=" * 60)
-    print("DRAFT PROSE OUTPUT:")
-    print("=" * 60)
-    print(result["prose"])
-    print("=" * 60)
-    print(f"Validation Status: {'PASSED' if result['passed_validation'] else 'VIOLATED'}")
-    print(f"Scene Summary (Tier 1): {result['summary']}")
+    print("\n" + "=" * 60, flush=True)
+    print("DRAFT PROSE OUTPUT:", flush=True)
+    print("=" * 60, flush=True)
+    print(result["prose"], flush=True)
+    print("=" * 60, flush=True)
+    print(f"Validation Status: {'PASSED' if result['passed_validation'] else 'VIOLATED'}", flush=True)
+    print(f"Scene Summary (Tier 1): {result['summary']}", flush=True)
 
 
 def cmd_export_epub(args):
