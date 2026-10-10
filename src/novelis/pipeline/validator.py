@@ -37,7 +37,7 @@ class ConsistencyValidator:
             # 2. Check physical trait contradictions (basic heuristic)
             traits = prof.get("physical_traits", {})
             for trait_name, trait_val in traits.items():
-                if trait_name.lower() in ["eyes", "mata"] and trait_val.lower() == "blue":
+                if trait_name.lower() in ["eyes", "eye_color"] and trait_val.lower() == "blue":
                     if f"brown eyes" in draft_prose.lower() and name.lower() in draft_prose.lower():
                         violations.append(
                             f"Trait Violation: Character '{name}' has immutable blue eyes, but draft mentions brown eyes."

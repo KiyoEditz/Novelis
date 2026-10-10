@@ -18,7 +18,7 @@ class EpubExporter:
         self,
         title: str = "Untitled Novel",
         author: str = "Novelis Author",
-        language: str = "id",
+        language: str = "en",
         synopsis: Optional[str] = None
     ):
         self.title = title
@@ -115,7 +115,7 @@ class EpubExporter:
 </head>
 <body>
   <h1 class="book-title">{html.escape(self.title)}</h1>
-  <p class="author">oleh {html.escape(self.author)}</p>
+  <p class="author">by {html.escape(self.author)}</p>
   {f'<div class="synopsis"><p class="first-p">{html.escape(self.synopsis)}</p></div>' if self.synopsis else ''}
 </body>
 </html>"""
@@ -169,14 +169,14 @@ class EpubExporter:
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="{self.language}">
 <head>
-  <title>Daftar Isi</title>
+  <title>Table of Contents</title>
   <link rel="stylesheet" type="text/css" href="style.css"/>
 </head>
 <body>
   <nav epub:type="toc" id="toc">
-    <h2>Daftar Isi</h2>
+    <h2>Table of Contents</h2>
     <ol>
-      <li><a href="title.xhtml">Judul</a></li>
+      <li><a href="title.xhtml">Title Page</a></li>
       {"".join(nav_points)}
     </ol>
   </nav>

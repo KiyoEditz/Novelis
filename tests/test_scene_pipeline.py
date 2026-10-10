@@ -23,19 +23,19 @@ def pipeline_env():
         retrieval = HybridRetrievalEngine(db_dir=lance_dir)
         summarizer = SummaryTreeManager(file_path=tree_file)
 
-        # Seed initial character
+        # Seed initial characters
         bible.upsert_character(
             char_id="char_aria",
             canonical_name="Aria Valen",
             physical_traits={"eyes": "blue", "hair": "silver"},
-            core_motivation="Mencari kebenaran",
+            core_motivation="Uncover the truth",
             life_status="ALIVE"
         )
         bible.upsert_character(
             char_id="char_ghost",
             canonical_name="Lord Cassian",
             physical_traits={},
-            core_motivation="Penjaga makam",
+            core_motivation="Guardian of the tomb",
             life_status="DECEASED"
         )
 
@@ -72,7 +72,7 @@ def test_orchestrator_5_step_execution(pipeline_env):
 
     result = orchestrator.execute_scene(
         scene_id="scn_test_01",
-        scene_beat="Aria memeriksa ukiran batu di kuil.",
+        scene_beat="Aria inspects the stone engravings at the ancient temple.",
         character_ids=["char_aria"],
         chapter_idx=1,
         scene_idx=1,

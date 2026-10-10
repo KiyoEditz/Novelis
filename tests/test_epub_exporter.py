@@ -14,20 +14,20 @@ def test_epub_generation():
         output_file = Path(tmpdir) / "test_book.epub"
 
         exporter = EpubExporter(
-            title="Kisah di Balik Salju",
+            title="Chronicles of the Frozen Gate",
             author="Novelis AI",
-            language="id",
-            synopsis="Sebuah petualangan di dunia es."
+            language="en",
+            synopsis="An adventure across the icy northern realms."
         )
 
         exporter.add_chapter(
-            title="Bab 1: Pertemuan di Gerbang",
-            content_html_or_text="Aria menatap gerbang es yang membeku.\n\n* * *\n\nLangkah kaki terdengar dari balik kabut.",
+            title="Chapter 1: The Gate Encounter",
+            content_html_or_text="Aria stared at the frozen iron gate.\n\n* * *\n\nFootsteps echoed from behind the veil of mist.",
             chapter_idx=1
         )
         exporter.add_chapter(
-            title="Bab 2: Rahasia Terungkap",
-            content_html_or_text="Segel perak itu akhirnya bersinar dalam kegelapan malam.",
+            title="Chapter 2: Secrets Revealed",
+            content_html_or_text="The silver seal finally gleamed in the twilight.",
             chapter_idx=2
         )
 
@@ -54,5 +54,5 @@ def test_epub_generation():
 
             # 3. Check content integrity
             chap1_text = zf.read("OEBPS/chapter_1.xhtml").decode("utf-8")
-            assert "Aria menatap gerbang es yang membeku." in chap1_text
+            assert "Aria stared at the frozen iron gate." in chap1_text
             assert "* * *" in chap1_text

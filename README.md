@@ -5,164 +5,164 @@
 [![Architecture: NSPEC](https://img.shields.io/badge/Architecture-NSPEC--000--007-green.svg)](docs/NSPEC-000.md)
 [![Model: Gemini 3.8](https://img.shields.io/badge/Model-Gemini%203.8%20Flash-orange.svg)](https://ai.google.dev/)
 
-**Novelis** adalah sistem operasi dan *compiler* naratif deterministik (**Fiction Operating System / FOS**) yang dirancang untuk menghasilkan karya fiksi dan novel skala panjang (50.000 hingga 100.000+ kata) tanpa mengalami degradasi konsistensi, halusinasi fakta, atau penyimpangan karakter (*character drift*).
+**Novelis** is a deterministic narrative operating system and story compiler (**Fiction Operating System / FOS**) engineered to generate full-length novels (50,000 to 100,000+ words) without consistency decay, factual hallucinations, or character drift.
 
-Sistem ini memisahkan secara tegas antara perencanaan kreatif (*Thinking*) dan eksekusi deterministik (*Executing*), dilengkapi dengan memori jangka panjang relasional (*Story Bible*) dan pengambilan konteks semantik hibrida.
+The architecture strictly decouples creative planning (*Thinking*) from deterministic execution (*Executing*), backed by a relational long-term memory system (*Story Bible*) and hybrid semantic context retrieval.
 
 ---
 
-## 🌟 Fitur Utama
+## 🌟 Key Features
 
 * **📖 Relational Story Bible (SQLite Hard Canon):**
-  Menyimpan kebenaran faktual cerita yang tak terbantahkan (*Hard Canon*) ke dalam tabel relasional: profil fisik karakter, rahasia/pengetahuan yang diketahui tokoh (*No Metagaming*), lokasi & aturan dunia, directed relational matrix, dan janji cerita/Chekhov's Gun (*Plot Threads*).
+  Persists inviolable factual story canon (*Hard Canon*) into structured relational tables: physical character profiles, epistemic knowledge barriers (*No Metagaming*), locations & world constraints, directed relational matrices, and unresolved narrative promises (*Plot Threads / Chekhov's Guns*).
 * **🔍 Hybrid Retrieval & Reranker (LanceDB + BGE-M3):**
-  Pencarian cuplikan adegan masa lalu menggabungkan vektor semantik (*Dense*) dan kata kunci leksikal (*Sparse*) untuk akurasi nama tokoh 100%, disaring melalui *cross-encoder reranker* (`bge-reranker-v2-m3`).
-* **🌲 Hierarchical Summarization Tree (Ringkasan Berlapis):**
-  Pohon ringkasan 4-tier (Adegan $\to$ Bab $\to$ Arc $\to$ Buku) yang menjaga *global awareness* model tanpa menghabiskan batas context window.
+  Queries past scene snippets by combining semantic dense vectors and lexical sparse representations for 100% character name recall, reranked through a neural cross-encoder (`bge-reranker-v2-m3`).
+* **🌲 Hierarchical Summarization Tree (Multi-Tier Memory):**
+  A 4-tier summarization tree (Scene $\to$ Chapter $\to$ Arc $\to$ Book) maintaining global narrative awareness across long works without overflowing LLM context windows.
 * **🔄 5-Step Scene Generation Pipeline:**
-  Siklus eksekusi deterministik per adegan:
-  1. *Outline:* Perumusan beat adegan.
-  2. *Retrieve:* Pengambilan entitas Bible, ringkasan adegan sebelumnya, dan 3–5 adegan lama yang relevan.
-  3. *Draft:* Sintesis prosa sastra menggunakan LLM (konteks 32k–128k).
-  4. *Consistency Check:* Validasi kepatuhan Rule Engine & koreksi otomatis (*Self-Healing Loop*).
-  5. *Fact Ingestion:* Ekstraksi fakta baru ke Story Bible dan pengindeksan ke LanceDB.
-* **⚡ Klien LLM Fleksibel (Default: Google Gemini 3.8):**
-  Dukungan native untuk Google **Gemini 3.8** (`gemini-3.8-flash` / `gemini-3.8-pro`) dengan context window raksasa, serta penyedia alternatif yang kompatibel dengan OpenAI (OpenRouter, Groq, Ollama).
+  A deterministic execution lifecycle for every scene:
+  1. *Outline:* Formulates the scene beat and objectives.
+  2. *Retrieve:* Queries Story Bible entities, prior scene summaries, and 3–5 relevant historical scenes.
+  3. *Draft:* Synthesizes literary prose via LLM (32k–128k context).
+  4. *Consistency Check:* Programmatic & LLM-based rule validation with an automated self-healing loop.
+  5. *Fact Ingestion:* Ingests new assertions into the Story Bible and indexes embeddings in LanceDB.
+* **⚡ Flexible LLM Client (Default: Google Gemini 3.8):**
+  First-class native support for Google **Gemini 3.8** (`gemini-3.8-flash` / `gemini-3.8-pro`) with massive context windows, alongside secondary support for any OpenAI-compatible provider (OpenRouter, Groq, Ollama).
 * **🖥️ Remote GPU Worker Script (Google Colab / Kaggle):**
-  Skrip mandiri berekstensi `.py` ([`notebooks/novelis_colab_worker.py`](notebooks/novelis_colab_worker.py)) untuk menjalankan inferensi berat BGE-M3 dan Reranker di GPU cloud gratis, menjaga laptop lokal tetap ringan.
-* **📚 Subsistem Ekspor EPUB:**
-  Mengemas seluruh bab, adegan, tipografi novel standar, dan daftar isi menjadi berkas digital `.epub` siap baca di e-reader (Kindle, Google Play Books, Apple Books, Kobo).
+  A standalone Python script ([`notebooks/novelis_colab_worker.py`](notebooks/novelis_colab_worker.py)) to offload compute-heavy BGE-M3 embeddings and cross-encoder reranking to free cloud GPUs, keeping your local machine responsive.
+* **📚 Standard EPUB Export Subsystem:**
+  Packages all chapters, scenes, typographically styled body text, and tables of contents into standard `.epub` digital books ready for e-readers (Kindle, Google Play Books, Apple Books, Kobo).
 
 ---
 
-## 🏛️ Arsitektur Spesifikasi (NSPEC Suite)
+## 🏛️ Specification Suite (NSPEC Architecture)
 
-Novelis dibangun berdasarkan standar spesifikasi formal normatif (RFC 2119) yang tersimpan di direktori [`docs/`](docs/):
+Novelis is built upon formal normative specifications (RFC 2119) maintained in the [`docs/`](docs/) directory:
 
-| Dokumen | Judul Spesifikasi | Deskripsi |
+| Document | Specification Title | Description |
 | :--- | :--- | :--- |
-| **[GLOSSARY.md](docs/GLOSSARY.md)** | *Lexicon & Master Terms* | Single Source of Truth untuk seluruh definisi teknis ekosistem Novelis. |
-| **[NSPEC-000](docs/NSPEC-000.md)** | *Core Philosophy & Constitution* | Hukum dasar, prinsip isolasi 4 layer, dan *Entropy Reduction Pipeline*. |
-| **[NSPEC-001](docs/NSPEC-001.md)** | *Domain Ontology & Story Model* | Formulasi matematika universe, dual timeline, dan taksonomi entitas. |
-| **[NSPEC-002](docs/NSPEC-002.md)** | *Narrative Memory Architecture* | Story Bible SQLite, pencarian hybrid BGE-M3, dan alur adegan 5-langkah. |
-| **[NSPEC-003](docs/NSPEC-003.md)** | *Story Blueprint & DSL Spec* | Skema deklaratif blueprint novel dan format *Novelis Story DSL*. |
-| **[NSPEC-004](docs/NSPEC-004.md)** | *CSIR & Compiler Toolchain* | Intermediate representation (CSIR), AST, dan aturan validasi semantik. |
-| **[NSPEC-005](docs/NSPEC-005.md)** | *Autonomous Runtime VM* | Mesin eksekusi deterministik, DAG scheduler, dan 3-Phase Commit. |
-| **[NSPEC-006](docs/NSPEC-006.md)** | *Rule Engine & Self-Healing* | Taksonomi invarian, verifikasi logika, dan loop koreksi otomatis. |
-| **[NSPEC-007](docs/NSPEC-007.md)** | *Renderer Layer & Plugins* | Sintesis prosa, negosiasi kapabilitas model, dan streaming telemetri. |
-| **[API-SPEC](docs/API-SPEC.md)** | *Dual-Plane Master Protocol* | Arsitektur [Control Plane](docs/api/control-plane.md), [Telemetry Plane](docs/api/telemetry-plane.md), dan [Data Plane](docs/api/data-plane.md). |
+| **[GLOSSARY.md](docs/GLOSSARY.md)** | *Lexicon & Master Terms* | Single Source of Truth for all technical definitions across the Novelis ecosystem. |
+| **[NSPEC-000](docs/NSPEC-000.md)** | *Core Philosophy & Constitution* | Foundational laws, 4-layer isolation principles, and the *Entropy Reduction Pipeline*. |
+| **[NSPEC-001](docs/NSPEC-001.md)** | *Domain Ontology & Story Model* | Mathematical universe formulation, dual timelines, and entity taxonomies. |
+| **[NSPEC-002](docs/NSPEC-002.md)** | *Narrative Memory Architecture* | SQLite Story Bible, BGE-M3 hybrid retrieval, and the 5-step scene generation pipeline. |
+| **[NSPEC-003](docs/NSPEC-003.md)** | *Story Blueprint & DSL Spec* | Declarative novel blueprint schemas and the *Novelis Story DSL* syntax. |
+| **[NSPEC-004](docs/NSPEC-004.md)** | *CSIR & Compiler Toolchain* | Canonical Story Intermediate Representation (CSIR), AST, and semantic validation rules. |
+| **[NSPEC-005](docs/NSPEC-005.md)** | *Autonomous Runtime VM* | Deterministic execution engine, DAG scheduler, and 3-Phase Commit protocol. |
+| **[NSPEC-006](docs/NSPEC-006.md)** | *Rule Engine & Self-Healing* | Invariant taxonomy, formal logic verification, and automated correction loops. |
+| **[NSPEC-007](docs/NSPEC-007.md)** | *Renderer Layer & Plugins* | Prose synthesis, model capability negotiation, and telemetry streaming. |
+| **[API-SPEC](docs/API-SPEC.md)** | *Dual-Plane Master Protocol* | System specifications for the [Control Plane](docs/api/control-plane.md), [Telemetry Plane](docs/api/telemetry-plane.md), and [Data Plane](docs/api/data-plane.md). |
 
 ---
 
-## 📁 Struktur Direktori
+## 📁 Repository Structure
 
 ```plaintext
 Novelis/
-├── docs/                                  # Spesifikasi arsitektur normatif (NSPEC & API)
-│   ├── api/                               # Sub-spesifikasi Control, Telemetry & Data Plane
-│   ├── GLOSSARY.md                        # Kamus definisi resmi
-│   └── NSPEC-000.md s/d NSPEC-007.md      # Spesifikasi arsitektur lengkap
+├── docs/                                  # Normative architectural specifications (NSPEC & API)
+│   ├── api/                               # Control, Telemetry & Data Plane sub-specs
+│   ├── GLOSSARY.md                        # Master lexicon and official definitions
+│   └── NSPEC-000.md to NSPEC-007.md       # Complete architectural specifications
 ├── notebooks/
-│   └── novelis_colab_worker.py            # Skrip worker GPU FastAPI untuk Google Colab / Kaggle
+│   └── novelis_colab_worker.py            # FastAPI GPU worker script for Google Colab / Kaggle
 ├── src/
 │   └── novelis/
-│       ├── config.py                      # Konfigurasi sistem & env loader
-│       ├── memory/                        # Story Bible SQLite, LanceDB, & Summary Tree
-│       ├── llm/                           # Adapter Gemini 3.8 & OpenAI-compatible
-│       ├── pipeline/                      # 5-Step Orchestrator, Validator, & Extractor
-│       ├── export/                        # Generator berkas buku digital EPUB
-│       └── cli.py                         # Antarmuka Command Line Interface
+│       ├── config.py                      # Global configuration & environment loader
+│       ├── memory/                        # SQLite Story Bible, LanceDB, & Summary Tree
+│       ├── llm/                           # Google Gemini 3.8 & OpenAI-compatible client adapters
+│       ├── pipeline/                      # 5-Step Orchestrator, Consistency Validator, & Extractor
+│       ├── export/                        # EPUB digital book generator
+│       └── cli.py                         # Unified Command-Line Interface
 ├── tests/                                 # Unit & integration test suite (pytest)
-├── .env.example                           # Template variabel lingkungan
-├── pyproject.toml                         # Konfigurasi packaging proyek
-├── requirements.txt                       # Dependensi paket Python
-├── LICENSE                                # Lisensi open-source MIT
-└── README.md                              # Dokumentasi proyek
+├── .env.example                           # Environment configuration template
+├── pyproject.toml                         # Project build and packaging metadata
+├── requirements.txt                       # Python dependencies
+├── LICENSE                                # MIT Open-Source License
+└── README.md                              # Project documentation
 ```
 
 ---
 
-## 🚀 Panduan Memulai (Quick Start)
+## 🚀 Quick Start Guide
 
-### 1. Prasyarat
-* **Python 3.10** (Sangat disarankan untuk kompatibilitas binary wheel LanceDB & FastEmbed di Windows).
+### 1. Prerequisites
+* **Python 3.10** (Recommended for binary wheel compatibility with LanceDB and FastEmbed on Windows).
 
-### 2. Instalasi & Virtual Environment
+### 2. Installation & Virtual Environment
 ```powershell
-# Buat dan aktifkan virtual environment Python 3.10
+# Create and activate a Python 3.10 virtual environment
 py -3.10 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
-# Instal dependensi proyek
+# Install project dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Konfigurasi Lingkungan (`.env`)
-Salin berkas `.env.example` menjadi `.env`:
+### 3. Environment Configuration (`.env`)
+Copy `.env.example` to create your local `.env`:
 ```powershell
 cp .env.example .env
 ```
-Buka file `.env` dan masukkan API Key Gemini Anda:
+Open `.env` and configure your Gemini API Key:
 ```ini
 # Primary LLM Provider: Google Gemini API (Default)
 GEMINI_API_KEY=AIzaSy...
 GEMINI_MODEL=gemini-3.8-flash
 
-# Pilihan mode embedding: "local" (FastEmbed ONNX) atau "remote" (Colab GPU)
+# Embedding Mode: "local" (FastEmbed ONNX CPU) or "remote" (Colab GPU)
 EMBEDDING_MODE=local
 LOCAL_EMBEDDING_MODEL=BAAI/bge-m3
 ```
 
 ---
 
-## 💻 Penggunaan Melalui Terminal (CLI)
+## 💻 Command-Line Interface (CLI)
 
-Novelis menyediakan antarmuka CLI terpadu:
+Novelis provides a unified CLI to initialize, inspect, execute, and export novel projects:
 
-### 1. Inisialisasi Database Story Bible & LanceDB
+### 1. Initialize Story Bible Database & LanceDB
 ```powershell
 $env:PYTHONPATH="src"
 python -m novelis.cli init-bible
 ```
 
-### 2. Memasukkan Data Contoh (Karakter Aria & Kael)
+### 2. Seed Sample Entities (Aria Valen & Kael)
 ```powershell
 python -m novelis.cli seed-sample
 ```
 
-### 3. Memeriksa Isi Story Bible (Hard Canon Inspector)
+### 3. Inspect Story Bible Contents (Hard Canon Inspector)
 ```powershell
 python -m novelis.cli inspect-bible
 ```
 
-### 4. Menjalankan Pembuatan Adegan (5-Step Lifecycle)
+### 4. Run 5-Step Scene Generation Pipeline
 ```powershell
-python -m novelis.cli run-scene --beat "Aria dan Kael menyusuri lorong berlumut di kuil bawah tanah untuk mencari segel kekaisaran."
+python -m novelis.cli run-scene --beat "Aria and Kael explore the moss-covered hallway in the sunken temple to locate the imperial seal."
 ```
 
-### 5. Mengekspor Seluruh Novel ke Format EPUB
+### 5. Export Complete Novel to EPUB
 ```powershell
-python -m novelis.cli export-epub --output "dist/Solaris_Chronicles.epub" --title "Solaris: Rahasia Sang Elang" --author "Novelis AI"
+python -m novelis.cli export-epub --output "dist/Solaris_Chronicles.epub" --title "Solaris: Secret of the Hawk" --author "Novelis AI"
 ```
-File EPUB yang dihasilkan di `dist/Solaris_Chronicles.epub` siap dibuka langsung di aplikasi e-reader favorit Anda.
+The compiled EPUB at `dist/Solaris_Chronicles.epub` is ready to open in any standard e-reader application (Kindle, Apple Books, Kobo, etc.).
 
 ---
 
-## ☁️ Menjalankan Worker GPU di Google Colab / Kaggle
+## ☁️ Running the GPU Worker on Google Colab / Kaggle
 
-Jika Anda ingin menghemat memori laptop lokal dan mempercepat inferensi embedding BGE-M3 & Reranker menggunakan GPU cloud gratis:
+To offload BGE-M3 dense embeddings and cross-encoder reranking to free cloud GPUs:
 
-1. Buka [Google Colab](https://colab.research.google.com/) dan pastikan runtime menggunakan **T4 GPU** (*Runtime -> Change runtime type -> T4 GPU*).
-2. Unggah atau salin skrip [`notebooks/novelis_colab_worker.py`](notebooks/novelis_colab_worker.py) ke sesi Colab.
-3. Instal dependensi worker di cell Colab:
+1. Open [Google Colab](https://colab.research.google.com/) and verify that the runtime is set to a **T4 GPU** (*Runtime -> Change runtime type -> T4 GPU*).
+2. Upload or copy [`notebooks/novelis_colab_worker.py`](notebooks/novelis_colab_worker.py) into the Colab session.
+3. Install the worker dependencies in a Colab code cell:
    ```bash
    !pip install fastapi uvicorn transformers torch accelerate pyngrok
    ```
-4. Jalankan worker:
+4. Run the worker script:
    ```bash
    !python novelis_colab_worker.py
    ```
-5. Salin URL publik yang dihasilkan (misal `https://xxxx.ngrok-free.app`) ke file `.env` laptop Anda:
+5. Copy the generated public tunnel URL (e.g. `https://xxxx.ngrok-free.app`) to your local `.env` file:
    ```ini
    EMBEDDING_MODE=remote
    REMOTE_WORKER_URL=https://xxxx.ngrok-free.app
@@ -170,22 +170,22 @@ Jika Anda ingin menghemat memori laptop lokal dan mempercepat inferensi embeddin
 
 ---
 
-## 🧪 Menjalankan Pengujian (Testing)
+## 🧪 Running Tests
 
-Jalankan rangkaian unit & integration tests menggunakan pytest:
+Execute the unit and integration test suite using `pytest`:
 ```powershell
 $env:PYTHONPATH="src"
 pytest tests/ -v
 ```
 
-Semua tes mencakup:
-- Integritas DDL SQLite Story Bible & pelacakan *character knowledge*.
-- Pencegahan pelanggaran karakter yang telah mati (*deceased actor check*).
-- Siklus orkestrasi 5-langkah end-to-end.
-- Validasi struktur dan integritas kontainer ZIP/XML pada berkas EPUB.
+Test coverage includes:
+- SQLite Story Bible DDL integrity & epistemic character knowledge tracking.
+- Deceased actor detection and prevention in narrative prose.
+- Full end-to-end 5-step scene generation pipeline execution.
+- Standard EPUB ZIP container, manifest, and XML structure validation.
 
 ---
 
-## 📄 Lisensi
+## 📄 License
 
-Proyek ini dilisensikan di bawah **[MIT License](LICENSE)**. Anda bebas menggunakan, memodifikasi, dan mendistribusikannya untuk keperluan pribadi maupun komersial.
+This project is licensed under the **[MIT License](LICENSE)**. You are free to use, modify, and distribute it for personal and commercial purposes.

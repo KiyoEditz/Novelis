@@ -99,7 +99,7 @@ CREATE TABLE characters (
     updated_epoch INTEGER NOT NULL
 );
 
--- 2. Character Knowledge Scope: Mencegah kebocoran informasi antar-karakter
+-- 2. Character Knowledge Scope: Prevents information leakage between characters (No Metagaming)
 CREATE TABLE character_knowledge (
     knowledge_id TEXT PRIMARY KEY,
     char_id TEXT NOT NULL REFERENCES characters(char_id),

@@ -22,7 +22,7 @@ def cmd_init_bible(args):
     bible = StoryBible()
     retrieval = HybridRetrievalEngine()
     summarizer = SummaryTreeManager()
-    print("[Novelis] Inisialisasi basis data Story Bible & LanceDB berhasil!")
+    print("[Novelis] Successfully initialized Story Bible SQLite database & LanceDB!")
     print(f"  - Database: {config.STORY_BIBLE_PATH}")
     print(f"  - LanceDB:  {config.LANCEDB_DIR}")
 
@@ -39,17 +39,17 @@ def cmd_seed_sample(args):
         aliases=["The Silver Crow"],
         age=19,
         physical_traits={"eyes": "blue", "hair": "silver", "height": "165cm"},
-        core_motivation="Membongkar konspirasi pengasingan ayahnya tanpa memicu perang.",
+        core_motivation="Uncover the conspiracy behind her father's exile without sparking a war.",
         life_status="ALIVE",
         epoch=0
     )
     bible.upsert_character(
         char_id="char_kael",
         canonical_name="Kaelen Vane",
-        aliases=["Kael", "Paman Kael"],
+        aliases=["Kael", "Uncle Kael"],
         age=44,
-        physical_traits={"eyes": "grey", "hair": "dark grey", "scars": "bekas luka bakar di lengan kiri"},
-        core_motivation="Melindungi sisa keluarga Valen dengan cara apa pun.",
+        physical_traits={"eyes": "grey", "hair": "dark grey", "scars": "burn scars across left arm"},
+        core_motivation="Protect the surviving members of the Valen family at any cost.",
         life_status="ALIVE",
         epoch=0
     )
@@ -58,7 +58,7 @@ def cmd_seed_sample(args):
     bible.add_knowledge(
         knowledge_id="kn_kael_01",
         char_id="char_kael",
-        proposition="Kael memegang segel resmi Grand Inquisitor Kekaisaran.",
+        proposition="Kael holds the official imperial seal of the Grand Inquisitor.",
         learned_epoch=0,
         source_entity_id="system"
     )
@@ -66,34 +66,34 @@ def cmd_seed_sample(args):
     # 3. Location
     bible.upsert_location(
         loc_id="loc_sunken_temple",
-        name="Reruntuhan Kuil Bawah Tanah",
-        environmental_conditions={"climate": "dingin lembap", "hazard": "kabut belerang"},
-        cultural_rules="Tanah suci terlarang bagi pengawal kekaisaran"
+        name="Sunken Temple Ruins",
+        environmental_conditions={"climate": "damp cold", "hazard": "sulfur mist"},
+        cultural_rules="Holy ground forbidden to imperial guards"
     )
 
     # 4. Relations
     bible.set_relation(
         source_char_id="char_aria",
         target_char_id="char_kael",
-        relation_type="PAMAN_DAN_KEPONAKAN",
+        relation_type="UNCLE_AND_NIECE",
         sentiment_score=0.4,
         trust_score=0.7,
-        notes="Aria menganggap Kael sebagai satu-satunya keluarga yang tersisa.",
+        notes="Aria considers Kael her only surviving family.",
         epoch=0
     )
 
     # 5. Plot Thread
     bible.add_plot_thread(
         thread_id="thr_father_amulet",
-        title="Rahasia Amulet Ayah",
-        description="Aria harus membaca inskripsi kuno pada amulet peninggalan ayahnya.",
+        title="Mystery of Father's Amulet",
+        description="Aria must decipher ancient inscriptions etched upon her father's heirloom amulet.",
         opened_epoch=0,
-        payoff_condition="Aria menemukan kunci kode di perpustakaan kekaisaran.",
+        payoff_condition="Aria discovers the cipher key in the imperial archives.",
         status="OPEN",
         associated_characters=["char_aria", "char_kael"]
     )
 
-    print("[Novelis] Data contoh karakter (Aria Valen & Kael) berhasil dimasukkan ke Story Bible!")
+    print("[Novelis] Canonical sample data (Aria Valen & Kael) successfully seeded into Story Bible!")
 
 
 def cmd_inspect_bible(args):
@@ -107,18 +107,18 @@ def cmd_inspect_bible(args):
     print("NOVELIS STORY BIBLE INSPECTOR (HARD CANON)")
     print("=" * 60)
     if aria:
-        print(f"Karakter: {aria['canonical_name']} ({aria['char_id']})")
-        print(f"  Fisik:  {aria['physical_traits']}")
-        print(f"  Status: {aria['life_status']}")
-        print(f"  Motif:  {aria['core_motivation']}")
+        print(f"Character: {aria['canonical_name']} ({aria['char_id']})")
+        print(f"  Physical:  {aria['physical_traits']}")
+        print(f"  Status:    {aria['life_status']}")
+        print(f"  Motive:    {aria['core_motivation']}")
     if kael:
-        print(f"\nKarakter: {kael['canonical_name']} ({kael['char_id']})")
-        print(f"  Fisik:  {kael['physical_traits']}")
-        print(f"  Status: {kael['life_status']}")
+        print(f"\nCharacter: {kael['canonical_name']} ({kael['char_id']})")
+        print(f"  Physical:  {kael['physical_traits']}")
+        print(f"  Status:    {kael['life_status']}")
         kael_kn = bible.get_character_knowledge("char_kael")
-        print(f"  Rahasia: {[k['proposition'] for k in kael_kn]}")
+        print(f"  Secrets:   {[k['proposition'] for k in kael_kn]}")
 
-    print("\nPLOT THREADS AKTIF:")
+    print("\nACTIVE PLOT THREADS:")
     for t in threads:
         print(f"  - [{t['thread_id']}] {t['title']} ({t['status']}): {t['description']}")
     print("=" * 60)
@@ -126,26 +126,26 @@ def cmd_inspect_bible(args):
 
 def cmd_run_scene(args):
     """Executes a 5-step scene generation cycle."""
-    beat = args.beat or "Aria bertemu Kael di reruntuhan kuil untuk memeriksa amulet kuno."
+    beat = args.beat or "Aria meets Kael at the sunken temple ruins to examine the ancient amulet."
     chars = args.characters.split(",") if args.characters else ["char_aria", "char_kael"]
     loc = args.location or "loc_sunken_temple"
 
-    # Inisialisasi LLM Client jika API key tersedia
+    # Initialize LLM Client if API key is provided
     llm = None
     if config.GEMINI_API_KEY:
         try:
             llm = GeminiClient()
-            print(f"[Novelis] Menggunakan LLM: Google {config.GEMINI_MODEL}")
+            print(f"[Novelis] Using LLM: Google {config.GEMINI_MODEL}")
         except Exception as e:
-            print(f"[Peringatan] Gagal memuat Gemini: {e}. Menggunakan mode simulasi mock.")
+            print(f"[Warning] Failed to load Gemini: {e}. Falling back to mock simulation mode.")
     else:
-        print("[Info] GEMINI_API_KEY tidak disetel. Menjalankan dalam mode simulasi mock.")
+        print("[Info] GEMINI_API_KEY is not set. Running in mock simulation mode.")
 
     orchestrator = SceneOrchestrator(llm_client=llm)
 
-    print(f"\n[Novelis] Memulai eksekusi adegan...")
+    print(f"\n[Novelis] Starting scene generation cycle...")
     print(f"  Beat: {beat}")
-    print(f"  Karakter: {chars}")
+    print(f"  Characters: {chars}")
 
     result = orchestrator.execute_scene(
         scene_id=args.scene_id or "scn_01_01",
@@ -158,18 +158,18 @@ def cmd_run_scene(args):
     )
 
     print("\n" + "=" * 60)
-    print("HASIL DRAF PROSA ADEGAN:")
+    print("DRAFT PROSE OUTPUT:")
     print("=" * 60)
     print(result["prose"])
     print("=" * 60)
-    print(f"Status Validasi: {'LOLOS' if result['passed_validation'] else 'DILANGGAR'}")
-    print(f"Ringkasan Adegan (Tier 1): {result['summary']}")
+    print(f"Validation Status: {'PASSED' if result['passed_validation'] else 'VIOLATED'}")
+    print(f"Scene Summary (Tier 1): {result['summary']}")
 
 
 def cmd_export_epub(args):
     """Compiles scenes into an EPUB digital book."""
     output = Path(args.output or "dist/Novelis_Story.epub")
-    title = args.title or "Solaris: Rahasia Sang Elang"
+    title = args.title or "Solaris: Secret of the Hawk"
     author = args.author or "Novelis Author"
 
     bible = StoryBible()
@@ -178,22 +178,22 @@ def cmd_export_epub(args):
     exporter = EpubExporter(
         title=title,
         author=author,
-        synopsis=summarizer.get_book_synopsis() or "Sebuah novel yang dihasilkan melalui sistem Novelis FOS."
+        synopsis=summarizer.get_book_synopsis() or "A novel generated with the Novelis AI authoring system."
     )
 
-    # Ambil adegan yang tersimpan dari summary tree atau query
+    # Retrieve stored scenes from summary tree
     scenes = summarizer.data.get("scenes", {})
     if not scenes:
-        # Fallback dummy chapter jika belum ada adegan
-        exporter.add_chapter("Bab 1: Awal Mula", "Di bawah langit yang beku, perjalanan dimulai.\n\n* * *\n\nLangkah kaki terdengar di kejauhan.", 1)
+        # Fallback dummy chapter if no scenes exist yet
+        exporter.add_chapter("Chapter 1: The Beginning", "Beneath a frozen sky, the journey began.\n\n* * *\n\nFootsteps echoed in the distance.", 1)
     else:
         for sid, sdata in scenes.items():
             chap_idx = sdata.get("chapter_idx", 1)
-            exporter.add_chapter(f"Bab {chap_idx}: {sid}", sdata.get("summary", ""), chap_idx)
+            exporter.add_chapter(f"Chapter {chap_idx}: {sid}", sdata.get("summary", ""), chap_idx)
 
     exported_path = exporter.export_to_file(output)
-    print(f"[Novelis] Berhasil mengekspor buku ke: {exported_path}")
-    print(f"Ukuran file: {exported_path.stat().st_size} bytes")
+    print(f"[Novelis] Successfully exported novel to: {exported_path}")
+    print(f"File size: {exported_path.stat().st_size} bytes")
 
 
 def main():
@@ -201,29 +201,29 @@ def main():
     subparsers = parser.add_subparsers(dest="command")
 
     # init-bible
-    subparsers.add_parser("init-bible", help="Inisialisasi database Story Bible")
+    subparsers.add_parser("init-bible", help="Initialize Story Bible database and directories")
 
     # seed-sample
-    subparsers.add_parser("seed-sample", help="Masukkan data contoh Aria & Kael")
+    subparsers.add_parser("seed-sample", help="Seed sample canonical entities (Aria & Kael)")
 
     # inspect-bible
-    subparsers.add_parser("inspect-bible", help="Periksa isi tabel Story Bible")
+    subparsers.add_parser("inspect-bible", help="Inspect Story Bible tables in console")
 
     # run-scene
-    p_run = subparsers.add_parser("run-scene", help="Jalankan pembuatan adegan 5-langkah")
-    p_run.add_argument("--beat", type=str, help="Arahan adegan (scene beat)")
-    p_run.add_argument("--characters", type=str, default="char_aria,char_kael", help="ID karakter pemisah koma")
-    p_run.add_argument("--location", type=str, default="loc_sunken_temple")
-    p_run.add_argument("--chapter", type=int, default=1)
-    p_run.add_argument("--scene", type=int, default=1)
-    p_run.add_argument("--epoch", type=int, default=1)
-    p_run.add_argument("--scene-id", type=str, default="scn_01_01")
+    p_run = subparsers.add_parser("run-scene", help="Execute 5-step scene generation pipeline")
+    p_run.add_argument("--beat", type=str, help="Narrative direction or beat for the scene")
+    p_run.add_argument("--characters", type=str, default="char_aria,char_kael", help="Comma-separated character IDs")
+    p_run.add_argument("--location", type=str, default="loc_sunken_temple", help="Location ID")
+    p_run.add_argument("--chapter", type=int, default=1, help="Chapter number")
+    p_run.add_argument("--scene", type=int, default=1, help="Scene index")
+    p_run.add_argument("--epoch", type=int, default=1, help="Timeline epoch")
+    p_run.add_argument("--scene-id", type=str, default="scn_01_01", help="Unique scene ID")
 
     # export-epub
-    p_epub = subparsers.add_parser("export-epub", help="Ekspor novel ke format EPUB")
-    p_epub.add_argument("--output", type=str, default="dist/Novel_Output.epub")
-    p_epub.add_argument("--title", type=str, default="Solaris: Rahasia Sang Elang")
-    p_epub.add_argument("--author", type=str, default="Novelis Author")
+    p_epub = subparsers.add_parser("export-epub", help="Export novel to EPUB format")
+    p_epub.add_argument("--output", type=str, default="dist/Novel_Output.epub", help="Destination EPUB file path")
+    p_epub.add_argument("--title", type=str, default="Solaris: Secret of the Hawk", help="Novel book title")
+    p_epub.add_argument("--author", type=str, default="Novelis Author", help="Author name")
 
     args = parser.parse_args()
     if not args.command:

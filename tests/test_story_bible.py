@@ -23,7 +23,7 @@ def test_character_upsert_and_retrieval(temp_bible):
         aliases=["The Silver Crow"],
         age=19,
         physical_traits={"eyes": "blue", "hair": "silver"},
-        core_motivation="Membongkar konspirasi pengasingan ayahnya",
+        core_motivation="Uncover the conspiracy behind her father's exile",
         life_status="ALIVE",
         epoch=1
     )
@@ -43,27 +43,27 @@ def test_character_knowledge_scope(temp_bible):
         char_id="char_kael",
         canonical_name="Kaelen Vane",
         physical_traits={"eyes": "grey"},
-        core_motivation="Melindungi keluarga",
+        core_motivation="Protect family",
         life_status="ALIVE"
     )
 
     temp_bible.add_knowledge(
         knowledge_id="kn_01",
         char_id="char_kael",
-        proposition="Kael memiliki segel Grand Inquisitor",
+        proposition="Kael holds the seal of the Grand Inquisitor",
         learned_epoch=1,
         source_entity_id="system"
     )
 
     knowledge = temp_bible.get_character_knowledge("char_kael")
     assert len(knowledge) == 1
-    assert knowledge[0]["proposition"] == "Kael memiliki segel Grand Inquisitor"
+    assert knowledge[0]["proposition"] == "Kael holds the seal of the Grand Inquisitor"
 
 
 def test_relations_and_plot_threads(temp_bible):
     """Verifies relational matrix edges and plot thread tracking."""
-    temp_bible.upsert_character("char_a", "Alpha", {}, "Motif A")
-    temp_bible.upsert_character("char_b", "Beta", {}, "Motif B")
+    temp_bible.upsert_character("char_a", "Alpha", {}, "Motive A")
+    temp_bible.upsert_character("char_b", "Beta", {}, "Motive B")
 
     temp_bible.set_relation(
         source_char_id="char_a",
@@ -80,10 +80,10 @@ def test_relations_and_plot_threads(temp_bible):
 
     temp_bible.add_plot_thread(
         thread_id="thr_01",
-        title="Rahasia Pedang Tua",
-        description="Pedang itu harus diasah dengan air suci",
+        title="Mystery of the Old Sword",
+        description="The sword must be quenched in holy water",
         opened_epoch=1,
-        payoff_condition="Pedang diasah di kuil",
+        payoff_condition="Sword quenched at the temple",
         status="OPEN"
     )
 

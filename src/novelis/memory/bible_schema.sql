@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS characters (
     updated_epoch INTEGER NOT NULL DEFAULT 0
 );
 
--- 2. Character Knowledge Scope: Mencegah kebocoran informasi antar-karakter (No Metagaming)
+-- 2. Character Knowledge Scope: Prevents information leakage between characters (No Metagaming)
 CREATE TABLE IF NOT EXISTS character_knowledge (
     knowledge_id TEXT PRIMARY KEY,
     char_id TEXT NOT NULL REFERENCES characters(char_id) ON DELETE CASCADE,

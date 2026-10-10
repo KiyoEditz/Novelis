@@ -2,14 +2,14 @@
 # Novelis Remote GPU Worker (Google Colab / Kaggle)
 # File: notebooks/novelis_colab_worker.py
 # 
-# PANDUAN PENGGUNAAN DI GOOGLE COLAB / KAGGLE:
-# 1. Buka Google Colab (Pastikan Runtime -> Change runtime type -> T4 GPU aktif).
-# 2. Buka terminal atau buat cell code baru, lalu jalankan instalasi dependensi:
+# USAGE GUIDE FOR GOOGLE COLAB / KAGGLE:
+# 1. Open Google Colab (Ensure Runtime -> Change runtime type -> T4 GPU is active).
+# 2. Open a terminal or create a code cell, then run dependency installation:
 #    !pip install fastapi uvicorn transformers torch accelerate pyngrok
-# 3. Jalankan skrip ini:
+# 3. Run this script:
 #    !python novelis_colab_worker.py
-# 4. Salin URL publik yang dihasilkan (ngrok / cloudflare) dan tempelkan ke file .env
-#    di laptop Anda: REMOTE_WORKER_URL=https://xxxx.ngrok-free.app
+# 4. Copy the generated public URL (ngrok / Cloudflare tunnel) and paste it into
+#    the .env file on your local machine: REMOTE_WORKER_URL=https://xxxx.ngrok-free.app
 # ==============================================================================
 
 import os
@@ -21,23 +21,23 @@ from pydantic import BaseModel
 import uvicorn
 
 # ------------------------------------------------------------------------------
-# 1. Inisialisasi Aplikasi FastAPI
+# 1. FastAPI Application Initialization
 # ------------------------------------------------------------------------------
 app = FastAPI(
     title="Novelis Remote GPU Worker",
-    description="Layanan inferensi embedding (BGE-M3) dan reranker berbasis GPU untuk Novelis Core",
+    description="GPU-accelerated embedding (BGE-M3) and reranker inference service for Novelis Core",
     version="1.0.0"
 )
 
 # ------------------------------------------------------------------------------
-# 2. Manajemen Model & Akselerasi GPU (CUDA)
+# 2. Model Management & GPU Acceleration (CUDA)
 # ------------------------------------------------------------------------------
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"[Novelis Worker] Menggunakan perangkat akselerasi: {DEVICE}")
+print(f"[Novelis Worker] Using compute device: {DEVICE}")
 if DEVICE == "cpu":
-    print("[PERINGATAN] GPU tidak terdeteksi! Inferensi akan berjalan lambat di CPU.")
+    print("[WARNING] GPU not detected! Inference will run on CPU and may be slow.")
 
-# Variabel global penampung model
+# Global model references
 embedding_model = None
 embedding_tokenizer = None
 reranker_model = None
@@ -46,27 +46,27 @@ reranker_tokenizer = None
 
 def load_models():
     """
-    Memuat model BGE-M3 dan BGE-Reranker-v2-M3 langsung ke VRAM GPU.
-    Model diunduh otomatis dari Hugging Face Hub saat skrip dijalankan pertama kali.
+    Loads BGE-M3 and BGE-Reranker-v2-M3 directly into GPU VRAM.
+    Models are automatically downloaded from Hugging Face Hub on first run.
     """
     global embedding_model, embedding_tokenizer, reranker_model, reranker_tokenizer
     from transformers import AutoModel, AutoTokenizer, AutoModelForSequenceClassification
 
-    print("[Novelis Worker] Sedang memuat BAAI/bge-m3 ke VRAM...")
+    print("[Novelis Worker] Loading BAAI/bge-m3 into VRAM...")
     embedding_tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-m3")
     embedding_model = AutoModel.from_pretrained("BAAI/bge-m3").to(DEVICE)
     embedding_model.eval()
 
-    print("[Novelis Worker] Sedang memuat BAAI/bge-reranker-v2-m3 ke VRAM...")
+    print("[Novelis Worker] Loading BAAI/bge-reranker-v2-m3 into VRAM...")
     reranker_tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-reranker-v2-m3")
     reranker_model = AutoModelForSequenceClassification.from_pretrained("BAAI/bge-reranker-v2-m3").to(DEVICE)
     reranker_model.eval()
 
-    print("[Novelis Worker] Seluruh model neural berhasil dimuat siap melayani request!")
+    print("[Novelis Worker] All neural models successfully loaded and ready for requests!")
 
 
 # ------------------------------------------------------------------------------
-# 3. Skema Data Request & Response (Pydantic)
+# 3. Pydantic Request & Response Schemas
 # ------------------------------------------------------------------------------
 class EmbeddingRequest(BaseModel):
     texts: List[str]
@@ -80,11 +80,11 @@ class RerankRequest(BaseModel):
 
 
 # ------------------------------------------------------------------------------
-# 4. Definisi Endpoint Layanan API
+# 4. API Endpoints
 # ------------------------------------------------------------------------------
 @app.get("/health")
 def health_check():
-    """Memeriksa status kesehatan server dan ketersediaan VRAM GPU."""
+    """Checks worker health status and GPU availability."""
     gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "None (CPU)"
     return {
         "status": "HEALTHY",
@@ -97,11 +97,11 @@ def health_check():
 @app.post("/v1/embeddings/hybrid")
 def generate_embeddings(req: EmbeddingRequest):
     """
-    Menghasilkan dense vector 1024-dim untuk sekumpulan teks adegan.
-    Dijalankan secara batch di GPU untuk kecepatan maksimal.
+    Generates 1024-dimensional dense vectors for candidate scene texts.
+    Processes inputs in batches on GPU for optimal throughput.
     """
     if embedding_model is None:
-        raise HTTPException(status_code=503, detail="Model embedding belum selesai dimuat")
+        raise HTTPException(status_code=503, detail="Embedding model is not loaded yet")
 
     with torch.no_grad():
         inputs = embedding_tokenizer(
@@ -113,7 +113,7 @@ def generate_embeddings(req: EmbeddingRequest):
         ).to(DEVICE)
         
         outputs = embedding_model(**inputs)
-        # Ambil representasi dense [CLS] token dan normalisasi L2
+        # Extract [CLS] token representation and perform L2 normalization
         dense_vecs = outputs.last_hidden_state[:, 0]
         dense_vecs = torch.nn.functional.normalize(dense_vecs, p=2, dim=1)
         dense_list = dense_vecs.cpu().tolist()
@@ -127,11 +127,11 @@ def generate_embeddings(req: EmbeddingRequest):
 @app.post("/v1/rerank")
 def rerank_candidates(req: RerankRequest):
     """
-    Menilai ulang relevansi kandidat teks terhadap query menggunakan Cross-Encoder.
-    Mengurutkan kandidat dari skor paling tinggi ke paling rendah.
+    Reranks candidate text relevance with respect to a query using a Cross-Encoder.
+    Sorts candidates from highest to lowest score.
     """
     if reranker_model is None:
-        raise HTTPException(status_code=503, detail="Model reranker belum selesai dimuat")
+        raise HTTPException(status_code=503, detail="Reranker model is not loaded yet")
 
     pairs = [[req.query, cand] for cand in req.candidates]
     with torch.no_grad():
@@ -145,7 +145,7 @@ def rerank_candidates(req: RerankRequest):
         scores = reranker_model(**inputs, return_dict=True).logits.view(-1).float()
         scores_list = scores.cpu().tolist()
 
-    # Gabungkan dengan teks asli dan urutkan
+    # Combine with candidate text and sort by descending score
     ranked = sorted(
         [{"index": i, "score": s, "text": req.candidates[i]} for i, s in enumerate(scores_list)],
         key=lambda x: x["score"],
@@ -158,26 +158,25 @@ def rerank_candidates(req: RerankRequest):
 
 
 # ------------------------------------------------------------------------------
-# 5. Eksekusi Server & Tunnel Publik (ngrok)
+# 5. Server Startup & Public Tunnel (ngrok)
 # ------------------------------------------------------------------------------
 def start_public_tunnel(port: int = 8000):
     """
-    Membuka terowongan publik (public tunnel) menggunakan ngrok.
-    Memungkinkan laptop lokal terhubung ke sesi Colab tanpa port forwarding manual.
+    Opens a public ngrok tunnel to connect local clients to the Colab worker.
     """
     try:
         from pyngrok import ngrok
-        # Jika Anda memiliki auth token ngrok, set di sini:
-        # ngrok.set_auth_token("TOKEN_ANDA")
+        # Set auth token if configured:
+        # ngrok.set_auth_token("YOUR_TOKEN")
         tunnel = ngrok.connect(port)
         print("=" * 60)
-        print(f"[Novelis Worker] Public Tunnel Aktif!")
-        print(f"Salin URL ini ke file .env laptop Anda:")
+        print(f"[Novelis Worker] Public Tunnel Active!")
+        print(f"Copy this URL to your local .env file:")
         print(f"REMOTE_WORKER_URL={tunnel.public_url}")
         print("=" * 60)
     except Exception as e:
-        print(f"[Info] Ngrok tidak aktif otomatis: {e}")
-        print(f"[Info] Jika di Colab, Anda dapat menggunakan 'localtunnel' atau 'cloudflared'.")
+        print(f"[Info] Ngrok did not start automatically: {e}")
+        print(f"[Info] On Colab, you may alternatively use 'localtunnel' or 'cloudflared'.")
 
 
 if __name__ == "__main__":
